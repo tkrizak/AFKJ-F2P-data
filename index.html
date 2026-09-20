@@ -1,0 +1,3149 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AFK Journey — Community Stats Dashboard</title>
+    <style>
+      :root {
+        --bg: #0b1124;
+        --bg-radial: radial-gradient(
+          circle at 50% 0%,
+          #1c2e5c 0%,
+          #0c142a 60%,
+          #060914 100%
+        );
+        --panel: #131d36;
+        --panel2: #1c2847;
+        --panel-border: #2c3f6e;
+        --text: #e6f0ff;
+        --muted: #8ca2cc;
+        --afk-gold: #f8c244;
+        --afk-gold-glow: rgba(248, 194, 68, 0.3);
+        --afk-cyan: #6edbf8;
+        --afk-purple: #9d52ff;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        background: var(--bg);
+        background-image: var(--bg-radial);
+        color: var(--text);
+        font-family:
+          'Segoe UI',
+          Inter,
+          system-ui,
+          -apple-system,
+          sans-serif;
+        min-height: 100vh;
+        font-size: 15px;
+        line-height: 1.5;
+      }
+
+      .container {
+        max-width: 1580px;
+        margin: auto;
+        padding: 24px;
+      }
+
+      header {
+        display: flex;
+        gap: 20px;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        margin-bottom: 24px;
+        background: linear-gradient(
+          135deg,
+          rgba(23, 36, 68, 0.95),
+          rgba(12, 20, 42, 0.95)
+        );
+        border: 1px solid var(--panel-border);
+        border-radius: 18px;
+        padding: 18px 26px;
+        box-shadow:
+          0 10px 30px rgba(0, 0, 0, 0.5),
+          inset 0 1px 1px rgba(255, 255, 255, 0.1);
+        position: relative;
+        overflow: hidden;
+      }
+
+      .header-left {
+        display: flex;
+        align-items: center;
+        gap: 20px;
+        z-index: 1;
+      }
+
+      .header-brand {
+        display: flex;
+        gap: 15px;
+        align-items: center;
+        flex-shrink: 0;
+      }
+
+      .game-logo-frame {
+        width: 90px;
+        height: 90px;
+        border-radius: 14px;
+        overflow: hidden;
+        border: 2px solid var(--afk-gold);
+        box-shadow: 0 0 16px var(--afk-gold-glow);
+        flex-shrink: 0;
+        background: #000;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .game-logo-frame img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+
+      .f2p-badge-wrapper {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 4px;
+        background: rgba(10, 16, 32, 0.6);
+        border-radius: 12px;
+        border: 1px solid rgba(248, 194, 68, 0.25);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+      }
+      .f2p-badge-wrapper img {
+        height: 82px;
+        width: auto;
+        display: block;
+        object-fit: contain;
+        filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.5));
+      }
+
+      .eyebrow {
+        color: var(--afk-cyan);
+        font-size: 12px;
+        font-weight: 800;
+        letter-spacing: 0.15em;
+        text-transform: uppercase;
+      }
+      h1 {
+        margin: 2px 0 0;
+        font-size: clamp(24px, 2.8vw, 36px);
+        letter-spacing: -0.02em;
+        color: #fff;
+        text-shadow: 0 2px 8px rgba(0, 0, 0, 0.6);
+      }
+      .subtitle {
+        color: var(--muted);
+        margin-top: 4px;
+        font-size: 14px;
+      }
+
+      .controls {
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+        background: var(--panel);
+        border: 1px solid var(--panel-border);
+        padding: 14px 18px;
+        border-radius: 14px;
+        margin-bottom: 18px;
+        align-items: center;
+        box-shadow: 0 4px 14px rgba(0, 0, 0, 0.2);
+      }
+      input,
+      select,
+      button {
+        background: #090e1f;
+        color: var(--text);
+        border: 1px solid var(--panel-border);
+        border-radius: 10px;
+        padding: 11px 16px;
+        font: inherit;
+        font-size: 14px;
+      }
+      input:focus,
+      select:focus {
+        outline: none;
+        border-color: var(--afk-cyan);
+        box-shadow: 0 0 8px rgba(110, 219, 248, 0.2);
+      }
+      input {
+        min-width: 260px;
+        flex: 1;
+      }
+      button {
+        cursor: pointer;
+        transition: all 0.2s;
+        background: linear-gradient(180deg, #1c2b50 0%, #121c36 100%);
+        color: #fff;
+        border: 1px solid var(--panel-border);
+        font-weight: 600;
+      }
+      button:hover {
+        border-color: var(--afk-gold);
+        background: #233563;
+        transform: translateY(-1px);
+        box-shadow: 0 0 10px var(--afk-gold-glow);
+      }
+
+      .layout {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) 320px;
+        gap: 20px;
+      }
+      .card {
+        background: var(--panel);
+        border: 1px solid var(--panel-border);
+        border-radius: 18px;
+        overflow: hidden;
+        box-shadow: 0 6px 24px rgba(0, 0, 0, 0.3);
+        position: relative;
+      }
+      .card-head {
+        padding: 18px 22px;
+        border-bottom: 1px solid var(--panel-border);
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+        align-items: center;
+        flex-wrap: wrap;
+        background: rgba(0, 0, 0, 0.2);
+      }
+      .card-head h2 {
+        font-size: 18px;
+        margin: 0;
+        color: var(--afk-gold);
+        letter-spacing: 0.02em;
+      }
+      .muted {
+        color: var(--muted);
+        font-size: 13px;
+      }
+
+      .table-wrap {
+        overflow: auto;
+        max-height: 75vh;
+        scroll-behavior: smooth;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: thin;
+        scrollbar-color: var(--panel-border) var(--bg);
+      }
+
+      .table-wrap::-webkit-scrollbar {
+        width: 8px;
+        height: 8px;
+      }
+      .table-wrap::-webkit-scrollbar-track {
+        background: rgba(11, 17, 36, 0.6);
+        border-radius: 8px;
+      }
+      .table-wrap::-webkit-scrollbar-thumb {
+        background: var(--panel-border);
+        border-radius: 8px;
+        border: 2px solid var(--panel);
+      }
+      .table-wrap::-webkit-scrollbar-thumb:hover {
+        background: var(--afk-cyan);
+        box-shadow: 0 0 10px var(--afk-cyan);
+      }
+      .table-wrap::-webkit-scrollbar-corner {
+        background: var(--bg);
+      }
+
+      table {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0;
+        min-width: 850px;
+      }
+      th,
+      td {
+        padding: 12px 16px;
+        border-bottom: 1px solid rgba(44, 63, 110, 0.4);
+        text-align: left;
+        white-space: nowrap;
+        font-size: 14px;
+      }
+      th {
+        color: var(--text);
+        background: rgba(12, 20, 42, 0.92);
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
+        position: sticky;
+        top: 0;
+        z-index: 2;
+        cursor: pointer;
+        user-select: none;
+        font-weight: 700;
+        font-size: 13px;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        border-bottom: 2px solid var(--panel-border);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+        transition:
+          background-color 0.15s ease,
+          color 0.15s ease;
+      }
+      th:hover {
+        color: var(--afk-cyan);
+        background: rgba(19, 30, 61, 0.95);
+      }
+      th.active-sort {
+        color: var(--afk-gold);
+        background: rgba(22, 37, 74, 0.95);
+      }
+      td.num,
+      th.num {
+        text-align: right;
+      }
+      tr:hover td {
+        background: rgba(110, 219, 248, 0.05);
+      }
+
+      .server-badge {
+        display: inline-block;
+        padding: 3px 8px;
+        border-radius: 6px;
+        font-size: 12px;
+        font-weight: 700;
+        letter-spacing: 0.02em;
+      }
+      .srv-s {
+        background: rgba(96, 165, 250, 0.15);
+        color: #93c5fd;
+        border: 1px solid rgba(96, 165, 250, 0.3);
+      }
+      .srv-g {
+        background: rgba(245, 158, 11, 0.15);
+        color: #fde047;
+        border: 1px solid rgba(245, 158, 11, 0.3);
+      }
+      .srv-h {
+        background: rgba(236, 72, 153, 0.15);
+        color: #f472b6;
+        border: 1px solid rgba(236, 72, 153, 0.3);
+      }
+      .srv-ptr {
+        background: rgba(168, 85, 247, 0.15);
+        color: #c084fc;
+        border: 1px solid rgba(168, 85, 247, 0.3);
+      }
+
+      .power-val {
+        font-weight: 800;
+        color: #fff;
+      }
+      .p-tier {
+        font-weight: 700;
+        border-radius: 4px;
+        padding: 2px 7px;
+      }
+      .p4-val {
+        color: #ff4d6d;
+        background: rgba(255, 77, 109, 0.15);
+        border: 1px solid rgba(255, 77, 109, 0.3);
+      }
+      .p3-val {
+        color: #ff9e00;
+        background: rgba(255, 158, 0, 0.15);
+        border: 1px solid rgba(255, 158, 0, 0.3);
+      }
+      .p2-val {
+        color: #00b4d8;
+        background: rgba(0, 180, 216, 0.15);
+        border: 1px solid rgba(0, 180, 216, 0.3);
+      }
+      .p1-val {
+        color: #9d4edd;
+        background: rgba(157, 78, 221, 0.15);
+        border: 1px solid rgba(157, 78, 221, 0.3);
+      }
+
+      .sp-legend-highlight {
+        color: var(--text);
+        background: linear-gradient(
+          135deg,
+          rgba(248, 194, 68, 0.15),
+          rgba(157, 82, 255, 0.15)
+        );
+        border: 1px solid var(--afk-gold);
+        padding: 10px 12px;
+        border-radius: 10px;
+        box-shadow: 0 0 12px rgba(248, 194, 68, 0.15);
+      }
+
+      .tracking-note {
+        font-size: 12px;
+        color: var(--muted);
+        background: rgba(11, 17, 36, 0.4);
+        border: 1px dashed var(--panel-border);
+        padding: 10px 12px;
+        border-radius: 10px;
+        line-height: 1.4;
+      }
+
+      .stats {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 12px;
+        padding: 18px;
+        border-bottom: 1px solid var(--panel-border);
+        background: rgba(0, 0, 0, 0.15);
+      }
+      .stat {
+        background: var(--panel2);
+        border: 1px solid var(--panel-border);
+        border-radius: 12px;
+        padding: 14px 18px;
+      }
+      .stat span {
+        font-size: 12px;
+        color: var(--muted);
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        display: block;
+      }
+      .stat strong {
+        font-size: 22px;
+        margin-top: 4px;
+        display: block;
+        color: var(--afk-gold);
+      }
+
+      .side-content {
+        padding: 18px;
+      }
+      .season-list {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 10px;
+      }
+      .season {
+        padding: 12px 6px;
+        text-align: center;
+        border: 1px solid var(--panel-border);
+        border-radius: 8px;
+        background: #090e1f;
+        color: var(--muted);
+        cursor: pointer;
+        font-size: 14px;
+        font-weight: 600;
+        transition: all 0.2s ease;
+      }
+      .season:hover {
+        border-color: var(--afk-cyan);
+        color: #fff;
+      }
+      .season.active {
+        background: linear-gradient(135deg, #1c2b50, #9d52ff);
+        color: white;
+        border-color: var(--afk-gold);
+        font-weight: 700;
+        box-shadow: 0 0 12px var(--afk-gold-glow);
+      }
+      .season.blank {
+        opacity: 0.4;
+      }
+
+      footer {
+        margin-top: 40px;
+        text-align: center;
+        color: var(--muted);
+        font-size: 14px;
+        padding: 20px 0 10px;
+        border-top: 1px solid rgba(44, 63, 110, 0.4);
+      }
+      footer strong {
+        color: var(--afk-cyan);
+      }
+
+      @media (max-width: 1050px) {
+        .layout {
+          grid-template-columns: 1fr;
+        }
+        .stats {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      @media (max-width: 768px) {
+        header {
+          flex-direction: column;
+          align-items: stretch;
+          padding: 16px;
+        }
+        .header-left {
+          flex-direction: column;
+          align-items: flex-start;
+          gap: 16px;
+          width: 100%;
+        }
+        .header-brand {
+          width: 100%;
+          justify-content: flex-start;
+        }
+        #exportBtn {
+          width: 100%;
+          margin-top: 8px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <header>
+        <div class="header-left">
+          <div class="header-brand">
+            <div class="game-logo-frame">
+              <img
+                src="afk-journey-logo.png"
+                alt="AFK Journey Logo"
+                onerror="
+                  this.style.display = 'none';
+                  this.parentElement.innerText = 'AFK';
+                "
+              />
+            </div>
+
+            <div
+              class="f2p-badge-wrapper"
+              title="1st Purchase Unclaimed (F2P Status)"
+            >
+              <img
+                src="first-purchase.png"
+                alt="1st Purchase Badge"
+                onerror="this.style.display = 'none'"
+              />
+            </div>
+          </div>
+
+          <div>
+            <div class="eyebrow">AFK Journey • F2P Discord Community</div>
+            <h1 id="mainTitle">Season 6 Community Stats</h1>
+            <div class="subtitle">
+              End of Season stats compiled by <strong>Gibe</strong>,
+              <strong>Krul</strong> and <strong>Dracias</strong>
+            </div>
+          </div>
+        </div>
+        <button id="exportBtn" style="height: fit-content; z-index: 1">
+          📥 Copy CSV Data
+        </button>
+      </header>
+
+      <div class="controls">
+        <select id="season" aria-label="Select season">
+          <option value="1">Season 1 · Untracked</option>
+          <option value="2">Season 2 · Archived</option>
+          <option value="3">Season 3 · Archived</option>
+          <option value="4">Season 4 · Archived</option>
+          <option value="5">Season 5 · Archived</option>
+          <option value="6" selected>Season 6 · Archived</option>
+          <option value="7">Season 7 · Upcoming</option>
+        </select>
+        <input
+          id="search"
+          placeholder="Search player name or server (e.g. S91, G1)..."
+          aria-label="Search player or server"
+        />
+        <button id="reset">Reset Filters</button>
+      </div>
+
+      <div class="layout">
+        <main class="card">
+          <div class="card-head">
+            <div>
+              <h2 id="tableTitle">Season 6 Data</h2>
+              <div class="muted">Click any column header to sort</div>
+            </div>
+            <div class="muted" id="count"></div>
+          </div>
+
+          <div class="stats">
+            <div class="stat">
+              <span>Total Tracked</span><strong id="players">—</strong>
+            </div>
+            <div class="stat">
+              <span>Avg Power</span><strong id="avgPower">—</strong>
+            </div>
+          </div>
+
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th data-key="rank" data-label="#">#</th>
+                  <th data-key="name" data-label="Player">Player</th>
+                  <th data-key="server" data-label="Server">Server</th>
+                  <th class="num" data-key="power" data-label="Power">Power</th>
+                  <th class="num" data-key="rr" data-label="RR(T)">RR(T)</th>
+                  <th class="num" data-key="p4" data-label="P4">P4</th>
+                  <th class="num" data-key="p3" data-label="P3">P3</th>
+                  <th class="num" data-key="p2" data-label="P2">P2</th>
+                  <th class="num" data-key="p1" data-label="P1">P1</th>
+                  <th class="num" data-key="splus" data-label="S+">S+</th>
+                  <th class="num" data-key="stier" data-label="S-tier">
+                    S-tier
+                  </th>
+                  <th class="num" data-key="atier" data-label="A-tier">
+                    A-tier
+                  </th>
+                  <th class="num" data-key="sp" data-label="SP">SP</th>
+                  <th class="num" data-key="ch" data-label="CH">CH</th>
+                </tr>
+              </thead>
+              <tbody id="tbody"></tbody>
+            </table>
+          </div>
+        </main>
+
+        <aside class="side">
+          <section class="card" style="margin-bottom: 18px">
+            <div class="card-head"><h2>Seasons Archive</h2></div>
+            <div class="side-content">
+              <div class="season-list" id="seasonList"></div>
+            </div>
+          </section>
+
+          <section class="card">
+            <div class="card-head"><h2>Legend & Definitions</h2></div>
+            <div
+              class="side-content muted"
+              style="display: flex; flex-direction: column; gap: 10px"
+            >
+              <div class="tracking-note">
+                <strong style="color: var(--text)"
+                  >Note on Data Tracking:</strong
+                >
+                Empty slots indicate data that was not tracked during previous
+                seasons. Additional categories may be added in future updates.
+              </div>
+              <hr
+                style="
+                  border: 0;
+                  border-top: 1px solid var(--panel-border);
+                  margin: 2px 0;
+                "
+              />
+
+              <div>
+                <span class="server-badge srv-s">S1-S600</span> Standard Servers
+              </div>
+              <div>
+                <span class="server-badge srv-g">G1-G800</span> Global Servers
+              </div>
+              <div>
+                <span class="server-badge srv-h">H1-H50</span> Homestead Servers
+              </div>
+              <div>
+                <span class="server-badge srv-ptr">PTR1</span> PTR Servers
+              </div>
+              <hr
+                style="
+                  border: 0;
+                  border-top: 1px solid var(--panel-border);
+                  margin: 2px 0;
+                "
+              />
+              <div>
+                <span class="p-tier p4-val">P4</span> /
+                <span class="p-tier p3-val">P3</span> High Paragon level
+                highlights
+              </div>
+              <hr
+                style="
+                  border: 0;
+                  border-top: 1px solid var(--panel-border);
+                  margin: 2px 0;
+                "
+              />
+
+              <div class="sp-legend-highlight">
+                <strong style="color: var(--afk-gold)"
+                  >⚡ SP (Soul Power):</strong
+                ><br />
+                <span style="font-size: 12px; color: var(--text)">
+                  (S-tier copies + A-tier copies) / 8<br />
+                  <em style="color: var(--muted); font-style: normal"
+                    >*Does not include CH copies</em
+                  >
+                </span>
+              </div>
+
+              <div>
+                <strong style="color: var(--text)">CH:</strong>
+                Celestial/Hypogean copies on account
+              </div>
+              <div>
+                <strong style="color: var(--text)">RR:</strong> Ravaged Realm
+                Total Damage
+              </div>
+            </div>
+          </section>
+        </aside>
+      </div>
+
+      <footer>
+        Website by <strong>Dracias</strong> • AFK Journey F2P Community
+      </footer>
+    </div>
+
+    <script>
+      const SEASONS_DATA = {
+        2: [
+          {
+            rank: 1,
+            name: 'Gauliath',
+            server: 'S3',
+            power: '—',
+            rr: null,
+            p4: null,
+            p3: null,
+            p2: null,
+            p1: null,
+            splus: null,
+            stier: 168,
+            atier: 1237,
+            sp: 322.63,
+            ch: null,
+          },
+          {
+            rank: 2,
+            name: 'Starstalker28',
+            server: 'S28',
+            power: '—',
+            rr: null,
+            p4: null,
+            p3: null,
+            p2: null,
+            p1: null,
+            splus: null,
+            stier: 177,
+            atier: 1390,
+            sp: 350.75,
+            ch: null,
+          },
+          {
+            rank: 3,
+            name: 'Soy',
+            server: 'S45',
+            power: '—',
+            rr: null,
+            p4: null,
+            p3: null,
+            p2: null,
+            p1: null,
+            splus: null,
+            stier: 188,
+            atier: 1345,
+            sp: 356.13,
+            ch: null,
+          },
+          {
+            rank: 4,
+            name: 'Krul',
+            server: 'S50',
+            power: '—',
+            rr: null,
+            p4: null,
+            p3: null,
+            p2: null,
+            p1: null,
+            splus: null,
+            stier: 171,
+            atier: 1346,
+            sp: 339.25,
+            ch: null,
+          },
+          {
+            rank: 5,
+            name: 'Dracias',
+            server: 'S91',
+            power: '—',
+            rr: null,
+            p4: null,
+            p3: null,
+            p2: null,
+            p1: null,
+            splus: null,
+            stier: 178,
+            atier: 1513,
+            sp: 367.13,
+            ch: null,
+          },
+          {
+            rank: 6,
+            name: 'Gibe',
+            server: 'S91',
+            power: '—',
+            rr: null,
+            p4: null,
+            p3: null,
+            p2: null,
+            p1: null,
+            splus: null,
+            stier: 171,
+            atier: 1392,
+            sp: 345.0,
+            ch: null,
+          },
+          {
+            rank: 7,
+            name: 'Rod',
+            server: 'S103',
+            power: '—',
+            rr: null,
+            p4: null,
+            p3: null,
+            p2: null,
+            p1: null,
+            splus: null,
+            stier: 162,
+            atier: 1329,
+            sp: 328.63,
+            ch: null,
+          },
+          {
+            rank: 8,
+            name: 'Vortex',
+            server: 'S116',
+            power: '—',
+            rr: null,
+            p4: null,
+            p3: null,
+            p2: null,
+            p1: null,
+            splus: null,
+            stier: 186,
+            atier: 1401,
+            sp: 361.13,
+            ch: null,
+          },
+          {
+            rank: 9,
+            name: 'Illizt',
+            server: 'S116',
+            power: '—',
+            rr: null,
+            p4: null,
+            p3: null,
+            p2: null,
+            p1: null,
+            splus: null,
+            stier: 183,
+            atier: 1328,
+            sp: 348.0,
+            ch: null,
+          },
+          {
+            rank: 10,
+            name: 'Mr. Crunch',
+            server: 'S395',
+            power: '—',
+            rr: null,
+            p4: null,
+            p3: null,
+            p2: null,
+            p1: null,
+            splus: null,
+            stier: 182,
+            atier: 1386,
+            sp: 355.75,
+            ch: null,
+          },
+          {
+            rank: 11,
+            name: 'RanDL',
+            server: 'S511',
+            power: '—',
+            rr: null,
+            p4: null,
+            p3: null,
+            p2: null,
+            p1: null,
+            splus: null,
+            stier: 165,
+            atier: 1257,
+            sp: 322.13,
+            ch: null,
+          },
+          {
+            rank: 12,
+            name: 'Zatiioo',
+            server: 'S516',
+            power: '—',
+            rr: null,
+            p4: null,
+            p3: null,
+            p2: null,
+            p1: null,
+            splus: null,
+            stier: 151,
+            atier: 1120,
+            sp: 291.0,
+            ch: null,
+          },
+          {
+            rank: 13,
+            name: 'Ayan',
+            server: 'S607',
+            power: '—',
+            rr: null,
+            p4: null,
+            p3: null,
+            p2: null,
+            p1: null,
+            splus: null,
+            stier: 135,
+            atier: 1124,
+            sp: 275.5,
+            ch: null,
+          },
+        ],
+        3: [
+          {
+            rank: 1,
+            name: 'Gauliath',
+            server: 'S3',
+            power: '53,553',
+            rr: 450,
+            p4: null,
+            p3: null,
+            p2: 0,
+            p1: 0,
+            splus: 39,
+            stier: 202,
+            atier: 1831,
+            sp: 430.875,
+            ch: null,
+          },
+          {
+            rank: 2,
+            name: 'Everytime13 (Time)',
+            server: 'S45',
+            power: '53,252',
+            rr: 324,
+            p4: null,
+            p3: null,
+            p2: 0,
+            p1: 0,
+            splus: 41,
+            stier: 243,
+            atier: 1821,
+            sp: 470.625,
+            ch: null,
+          },
+          {
+            rank: 3,
+            name: 'Rod',
+            server: 'S103',
+            power: '57,199',
+            rr: 461,
+            p4: null,
+            p3: null,
+            p2: 0,
+            p1: 0,
+            splus: 53,
+            stier: 233,
+            atier: 2090,
+            sp: 494.25,
+            ch: null,
+          },
+          {
+            rank: 4,
+            name: 'Dracias',
+            server: 'S91',
+            power: '55,785',
+            rr: 477.2,
+            p4: null,
+            p3: null,
+            p2: 0,
+            p1: 14,
+            splus: 36,
+            stier: 257,
+            atier: 2279,
+            sp: 541.875,
+            ch: null,
+          },
+          {
+            rank: 5,
+            name: 'Gibe',
+            server: 'S91',
+            power: '58,000',
+            rr: 474.9,
+            p4: null,
+            p3: null,
+            p2: 0,
+            p1: 12,
+            splus: 39,
+            stier: 257,
+            atier: 2356,
+            sp: 551.5,
+            ch: null,
+          },
+          {
+            rank: 6,
+            name: 'Zatiioo (Phazon)',
+            server: 'S516',
+            power: '51,457',
+            rr: 445,
+            p4: null,
+            p3: null,
+            p2: 0,
+            p1: 7,
+            splus: 31,
+            stier: 226,
+            atier: 1752,
+            sp: 445,
+            ch: null,
+          },
+          {
+            rank: 7,
+            name: 'SirGrumpy',
+            server: 'S409',
+            power: '48,500',
+            rr: 400,
+            p4: null,
+            p3: null,
+            p2: 0,
+            p1: 15,
+            splus: 22,
+            stier: 239,
+            atier: 1873,
+            sp: 473.125,
+            ch: null,
+          },
+          {
+            rank: 8,
+            name: 'onesNzeroes',
+            server: '—',
+            power: '46,742',
+            rr: 339.4,
+            p4: null,
+            p3: null,
+            p2: 0,
+            p1: 0,
+            splus: 28,
+            stier: 154,
+            atier: 1452,
+            sp: 335.5,
+            ch: null,
+          },
+          {
+            rank: 9,
+            name: 'Oom',
+            server: '—',
+            power: '45,408',
+            rr: 406.5,
+            p4: null,
+            p3: null,
+            p2: 0,
+            p1: 0,
+            splus: 28,
+            stier: 154,
+            atier: 1435,
+            sp: 333.375,
+            ch: null,
+          },
+          {
+            rank: 10,
+            name: 'Mega',
+            server: 'S464',
+            power: '52,594',
+            rr: 429.4,
+            p4: null,
+            p3: null,
+            p2: 0,
+            p1: 2,
+            splus: 40,
+            stier: 203,
+            atier: 1889,
+            sp: 439.125,
+            ch: null,
+          },
+          {
+            rank: 11,
+            name: 'Mizon',
+            server: '—',
+            power: '56,503',
+            rr: 472.4,
+            p4: null,
+            p3: null,
+            p2: 0,
+            p1: 7,
+            splus: 42,
+            stier: 246,
+            atier: 2085,
+            sp: 506.625,
+            ch: null,
+          },
+          {
+            rank: 12,
+            name: 'Zinthos',
+            server: '—',
+            power: '47,579',
+            rr: 369,
+            p4: null,
+            p3: null,
+            p2: 0,
+            p1: 1,
+            splus: 26,
+            stier: 170,
+            atier: 1367,
+            sp: 340.875,
+            ch: null,
+          },
+          {
+            rank: 13,
+            name: 'Krul',
+            server: 'S50',
+            power: '55,083',
+            rr: 457.2,
+            p4: null,
+            p3: null,
+            p2: 0,
+            p1: 10,
+            splus: 38,
+            stier: 253,
+            atier: 2103,
+            sp: 515.875,
+            ch: null,
+          },
+          {
+            rank: 14,
+            name: 'Tokumei',
+            server: '—',
+            power: '55,146',
+            rr: 451.7,
+            p4: null,
+            p3: null,
+            p2: 0,
+            p1: 7,
+            splus: 41,
+            stier: 224,
+            atier: 2164,
+            sp: 494.5,
+            ch: null,
+          },
+          {
+            rank: 15,
+            name: 'Soy',
+            server: 'S45',
+            power: '57,147',
+            rr: 471.2,
+            p4: null,
+            p3: null,
+            p2: 0,
+            p1: 10,
+            splus: 39,
+            stier: 275,
+            atier: 2181,
+            sp: 547.625,
+            ch: null,
+          },
+          {
+            rank: 16,
+            name: 'Eternity F2P',
+            server: 'S314',
+            power: '57,715',
+            rr: 468.2,
+            p4: null,
+            p3: null,
+            p2: 0,
+            p1: 6,
+            splus: 48,
+            stier: 250,
+            atier: 2008,
+            sp: 517,
+            ch: null,
+          },
+          {
+            rank: 17,
+            name: 'RanDL',
+            server: 'S511',
+            power: '53,102',
+            rr: 365.1,
+            p4: null,
+            p3: null,
+            p2: 0,
+            p1: 14,
+            splus: 28,
+            stier: 255,
+            atier: 1911,
+            sp: 493.875,
+            ch: null,
+          },
+          {
+            rank: 18,
+            name: 'Asuna',
+            server: 'S186',
+            power: '56,934',
+            rr: 449,
+            p4: null,
+            p3: null,
+            p2: 0,
+            p1: 4,
+            splus: 50,
+            stier: 247,
+            atier: 2087,
+            sp: 507.875,
+            ch: null,
+          },
+          {
+            rank: 19,
+            name: 'Sunny',
+            server: '—',
+            power: '50,316',
+            rr: 450.6,
+            p4: null,
+            p3: null,
+            p2: 0,
+            p1: 6,
+            splus: 32,
+            stier: 218,
+            atier: 1808,
+            sp: 444,
+            ch: null,
+          },
+          {
+            rank: 20,
+            name: 'Mr. Crunch',
+            server: '—',
+            power: '53,588',
+            rr: 415.7,
+            p4: null,
+            p3: null,
+            p2: 0,
+            p1: 2,
+            splus: 42,
+            stier: 232,
+            atier: 1836,
+            sp: 461.5,
+            ch: null,
+          },
+          {
+            rank: 21,
+            name: 'Hailey',
+            server: '—',
+            power: '51,643',
+            rr: 420,
+            p4: null,
+            p3: null,
+            p2: 0,
+            p1: 6,
+            splus: 25,
+            stier: 206,
+            atier: 1749,
+            sp: 424.625,
+            ch: null,
+          },
+          {
+            rank: 22,
+            name: 'PickleRickII',
+            server: '—',
+            power: '52,502',
+            rr: 436.7,
+            p4: null,
+            p3: null,
+            p2: 0,
+            p1: 16,
+            splus: 24,
+            stier: 251,
+            atier: 2060,
+            sp: 508.5,
+            ch: null,
+          },
+          {
+            rank: 23,
+            name: 'Leiolas (PTR)',
+            server: 'PTR1',
+            power: '60,801',
+            rr: 474.9,
+            p4: null,
+            p3: null,
+            p2: 1,
+            p1: 20,
+            splus: 34,
+            stier: 313,
+            atier: 2644,
+            sp: 643.5,
+            ch: null,
+          },
+        ],
+        4: [
+          {
+            rank: 1,
+            name: 'Gauliath',
+            server: 'S3',
+            power: '65,336',
+            rr: '81,457',
+            p4: null,
+            p3: null,
+            p2: null,
+            p1: 10,
+            splus: 51,
+            stier: 309,
+            atier: 2215,
+            sp: 586,
+            ch: null,
+          },
+          {
+            rank: 2,
+            name: 'Soy',
+            server: 'S45',
+            power: '67,776',
+            rr: '89,074',
+            p4: null,
+            p3: 3,
+            p2: 18,
+            p1: null,
+            splus: 43,
+            stier: 368,
+            atier: 2521,
+            sp: 683,
+            ch: null,
+          },
+          {
+            rank: 3,
+            name: 'Krul',
+            server: 'S50',
+            power: '65,834',
+            rr: '81,756',
+            p4: null,
+            p3: 7,
+            p2: 16,
+            p1: null,
+            splus: 39,
+            stier: 361,
+            atier: 2543,
+            sp: 679,
+            ch: null,
+          },
+          {
+            rank: 4,
+            name: 'Ariik',
+            server: 'S52',
+            power: '67,279',
+            rr: '76,481',
+            p4: null,
+            p3: null,
+            p2: null,
+            p1: 16,
+            splus: 51,
+            stier: 349,
+            atier: 2409,
+            sp: 650,
+            ch: null,
+          },
+          {
+            rank: 5,
+            name: 'Lucky',
+            server: 'S80',
+            power: '65,384',
+            rr: '79,399',
+            p4: null,
+            p3: 2,
+            p2: 18,
+            p1: null,
+            splus: 35,
+            stier: 325,
+            atier: 2384,
+            sp: 623,
+            ch: null,
+          },
+          {
+            rank: 6,
+            name: 'Gibe',
+            server: 'S91',
+            power: '64,857',
+            rr: '77,817',
+            p4: null,
+            p3: null,
+            p2: null,
+            p1: 17,
+            splus: 40,
+            stier: 317,
+            atier: 2355,
+            sp: 611,
+            ch: null,
+          },
+          {
+            rank: 7,
+            name: 'Dracias',
+            server: 'S91',
+            power: '62,948',
+            rr: '74,623',
+            p4: null,
+            p3: 1,
+            p2: 19,
+            p1: null,
+            splus: 36,
+            stier: 308,
+            atier: 2375,
+            sp: 605,
+            ch: null,
+          },
+          {
+            rank: 8,
+            name: 'Rod',
+            server: 'S103',
+            power: '69,728',
+            rr: '85,172',
+            p4: null,
+            p3: null,
+            p2: null,
+            p1: 16,
+            splus: 57,
+            stier: 347,
+            atier: 2667,
+            sp: 680,
+            ch: null,
+          },
+          {
+            rank: 9,
+            name: 'Asuna',
+            server: 'S186',
+            power: '69,016',
+            rr: '84,771',
+            p4: null,
+            p3: null,
+            p2: null,
+            p1: 13,
+            splus: 59,
+            stier: 360,
+            atier: 2411,
+            sp: 661,
+            ch: null,
+          },
+          {
+            rank: 10,
+            name: 'Askgar',
+            server: 'S237',
+            power: '62,495',
+            rr: '77,311',
+            p4: null,
+            p3: 2,
+            p2: 24,
+            p1: null,
+            splus: 22,
+            stier: 368,
+            atier: 2298,
+            sp: 655,
+            ch: null,
+          },
+          {
+            rank: 11,
+            name: 'Sapphire',
+            server: 'S295',
+            power: '61,309',
+            rr: '81,593',
+            p4: null,
+            p3: 8,
+            p2: 15,
+            p1: null,
+            splus: 28,
+            stier: 358,
+            atier: 2227,
+            sp: 636,
+            ch: null,
+          },
+          {
+            rank: 12,
+            name: 'RanDL',
+            server: 'S511',
+            power: '58,651',
+            rr: '66,261',
+            p4: null,
+            p3: 1,
+            p2: 14,
+            p1: 8,
+            splus: 28,
+            stier: 362,
+            atier: 2343,
+            sp: 655,
+            ch: null,
+          },
+          {
+            rank: 13,
+            name: 'Zatiio',
+            server: 'S516',
+            power: '63,593',
+            rr: '77,132',
+            p4: null,
+            p3: null,
+            p2: null,
+            p1: 12,
+            splus: 42,
+            stier: 303,
+            atier: 2043,
+            sp: 558,
+            ch: null,
+          },
+          {
+            rank: 14,
+            name: 'Mavis_D',
+            server: 'S602',
+            power: '66,006',
+            rr: '72,025',
+            p4: null,
+            p3: null,
+            p2: null,
+            p1: 16,
+            splus: 40,
+            stier: 324,
+            atier: 2181,
+            sp: 597,
+            ch: null,
+          },
+          {
+            rank: 15,
+            name: 'oNz',
+            server: 'G191',
+            power: '54,537',
+            rr: '?',
+            p4: null,
+            p3: null,
+            p2: null,
+            p1: 1,
+            splus: 37,
+            stier: 208,
+            atier: 1577,
+            sp: 405,
+            ch: null,
+          },
+          {
+            rank: 16,
+            name: 'frawress',
+            server: 'G310',
+            power: '62,269',
+            rr: '82,675',
+            p4: null,
+            p3: null,
+            p2: null,
+            p1: 10,
+            splus: 39,
+            stier: 286,
+            atier: 2026,
+            sp: 539,
+            ch: null,
+          },
+          {
+            rank: 17,
+            name: 'Mae',
+            server: 'G432',
+            power: '60,493',
+            rr: '80,546',
+            p4: null,
+            p3: null,
+            p2: null,
+            p1: 8,
+            splus: 40,
+            stier: 264,
+            atier: 1979,
+            sp: 511,
+            ch: null,
+          },
+          {
+            rank: 18,
+            name: 'Nick',
+            server: 'G601',
+            power: '47,407',
+            rr: '70,687',
+            p4: null,
+            p3: null,
+            p2: null,
+            p1: 2,
+            splus: 27,
+            stier: 185,
+            atier: 1176,
+            sp: 332,
+            ch: null,
+          },
+        ],
+        5: [
+          {
+            rank: 1,
+            name: 'Pigeon',
+            server: 'S27',
+            power: '78,819',
+            rr: 127,
+            p4: null,
+            p3: 0,
+            p2: 5,
+            p1: 25,
+            splus: 48,
+            stier: 435,
+            atier: 3549,
+            sp: 879,
+            ch: null,
+          },
+          {
+            rank: 2,
+            name: 'Soy',
+            server: 'S45',
+            power: '79,521',
+            rr: 135,
+            p4: null,
+            p3: 0,
+            p2: 14,
+            p1: 14,
+            splus: 47,
+            stier: 491,
+            atier: 3625,
+            sp: 944,
+            ch: null,
+          },
+          {
+            rank: 3,
+            name: 'Krul',
+            server: 'S50',
+            power: '77,500',
+            rr: 123,
+            p4: null,
+            p3: 2,
+            p2: 14,
+            p1: 16,
+            splus: 43,
+            stier: 477,
+            atier: 3797,
+            sp: 952,
+            ch: null,
+          },
+          {
+            rank: 4,
+            name: 'Ariik',
+            server: 'S52',
+            power: '78,475',
+            rr: 123,
+            p4: null,
+            p3: 0,
+            p2: 9,
+            p1: 16,
+            splus: 56,
+            stier: 464,
+            atier: 3538,
+            sp: 906,
+            ch: null,
+          },
+          {
+            rank: 5,
+            name: 'Gibe',
+            server: 'S91',
+            power: '78,255',
+            rr: 127,
+            p4: null,
+            p3: 7,
+            p2: 8,
+            p1: 9,
+            splus: 49,
+            stier: 477,
+            atier: 3890,
+            sp: 963,
+            ch: null,
+          },
+          {
+            rank: 6,
+            name: 'Dracias',
+            server: 'S91',
+            power: '78,751',
+            rr: 128,
+            p4: null,
+            p3: 2,
+            p2: 13,
+            p1: 11,
+            splus: 52,
+            stier: 463,
+            atier: 3828,
+            sp: 942,
+            ch: null,
+          },
+          {
+            rank: 7,
+            name: 'Rod',
+            server: 'S103',
+            power: '77,422',
+            rr: 125,
+            p4: null,
+            p3: 0,
+            p2: 0,
+            p1: 18,
+            splus: 60,
+            stier: 388,
+            atier: 3222,
+            sp: 791,
+            ch: null,
+          },
+          {
+            rank: 8,
+            name: 'Week',
+            server: 'S104',
+            power: '81,307',
+            rr: 135,
+            p4: null,
+            p3: 3,
+            p2: 12,
+            p1: 14,
+            splus: 51,
+            stier: 480,
+            atier: 3877,
+            sp: 965,
+            ch: null,
+          },
+          {
+            rank: 9,
+            name: 'Boo',
+            server: 'S117',
+            power: '83,418',
+            rr: 131,
+            p4: null,
+            p3: 0,
+            p2: 8,
+            p1: 17,
+            splus: 57,
+            stier: 477,
+            atier: 3281,
+            sp: 887,
+            ch: null,
+          },
+          {
+            rank: 10,
+            name: 'Askgar',
+            server: 'S237',
+            power: '72,613',
+            rr: 116,
+            p4: null,
+            p3: 0,
+            p2: 14,
+            p1: 15,
+            splus: 28,
+            stier: 467,
+            atier: 3217,
+            sp: 869,
+            ch: null,
+          },
+          {
+            rank: 11,
+            name: 'Foxy',
+            server: 'S272',
+            power: '83,755',
+            rr: 137,
+            p4: null,
+            p3: 0,
+            p2: 7,
+            p1: 21,
+            splus: 55,
+            stier: 480,
+            atier: 3527,
+            sp: 921,
+            ch: null,
+          },
+          {
+            rank: 12,
+            name: 'Arr',
+            server: 'S276',
+            power: '80,691',
+            rr: 133,
+            p4: null,
+            p3: 0,
+            p2: 9,
+            p1: 22,
+            splus: 47,
+            stier: 450,
+            atier: 3808,
+            sp: 926,
+            ch: null,
+          },
+          {
+            rank: 13,
+            name: 'Eternity',
+            server: 'S314',
+            power: '80,469',
+            rr: 135,
+            p4: null,
+            p3: 3,
+            p2: 13,
+            p1: 13,
+            splus: 47,
+            stier: 499,
+            atier: 3652,
+            sp: 956,
+            ch: null,
+          },
+          {
+            rank: 14,
+            name: 'Grumpy',
+            server: 'S409',
+            power: '62,851',
+            rr: 71,
+            p4: null,
+            p3: 4,
+            p2: 15,
+            p1: 10,
+            splus: 18,
+            stier: 425,
+            atier: 3244,
+            sp: 831,
+            ch: null,
+          },
+          {
+            rank: 15,
+            name: 'Emilico',
+            server: 'S418',
+            power: '75,928',
+            rr: 122,
+            p4: null,
+            p3: 0,
+            p2: 16,
+            p1: 15,
+            splus: 37,
+            stier: 470,
+            atier: 3379,
+            sp: 892,
+            ch: null,
+          },
+          {
+            rank: 16,
+            name: 'Wulala',
+            server: 'S443',
+            power: '75,253',
+            rr: 122,
+            p4: null,
+            p3: 7,
+            p2: 11,
+            p1: 12,
+            splus: 36,
+            stier: 505,
+            atier: 3460,
+            sp: 938,
+            ch: null,
+          },
+          {
+            rank: 17,
+            name: 'Mega',
+            server: 'S464',
+            power: '75,524',
+            rr: 116,
+            p4: null,
+            p3: 0,
+            p2: 2,
+            p1: 21,
+            splus: 49,
+            stier: 416,
+            atier: 3235,
+            sp: 820,
+            ch: null,
+          },
+          {
+            rank: 18,
+            name: 'PlinkoMori',
+            server: 'S481',
+            power: '72,821',
+            rr: 99,
+            p4: null,
+            p3: 0,
+            p2: 5,
+            p1: 20,
+            splus: 35,
+            stier: 369,
+            atier: 3388,
+            sp: 793,
+            ch: null,
+          },
+          {
+            rank: 19,
+            name: 'BlackChameleon',
+            server: 'S498',
+            power: '82,457',
+            rr: 125,
+            p4: null,
+            p3: 0,
+            p2: 1,
+            p1: 23,
+            splus: 57,
+            stier: 403,
+            atier: 3541,
+            sp: 846,
+            ch: null,
+          },
+          {
+            rank: 20,
+            name: 'RanDL',
+            server: 'S511',
+            power: '66,634',
+            rr: 85,
+            p4: null,
+            p3: 7,
+            p2: 10,
+            p1: 9,
+            splus: 32,
+            stier: 479,
+            atier: 3267,
+            sp: 887,
+            ch: null,
+          },
+          {
+            rank: 21,
+            name: 'Zatiioo',
+            server: 'S516',
+            power: '76,805',
+            rr: 127,
+            p4: null,
+            p3: 0,
+            p2: 9,
+            p1: 14,
+            splus: 48,
+            stier: 421,
+            atier: 3147,
+            sp: 814,
+            ch: null,
+          },
+          {
+            rank: 22,
+            name: 'Rae',
+            server: 'S537',
+            power: '75,722',
+            rr: 129,
+            p4: null,
+            p3: 0,
+            p2: 10,
+            p1: 15,
+            splus: 37,
+            stier: 398,
+            atier: 3480,
+            sp: 833,
+            ch: null,
+          },
+          {
+            rank: 23,
+            name: 'Mavis',
+            server: 'S602',
+            power: '77,357',
+            rr: 130,
+            p4: null,
+            p3: 0,
+            p2: 9,
+            p1: 15,
+            splus: 43,
+            stier: 430,
+            atier: 3287,
+            sp: 841,
+            ch: null,
+          },
+          {
+            rank: 24,
+            name: 'Cynthia',
+            server: 'G1',
+            power: '63,126',
+            rr: 105,
+            p4: null,
+            p3: 3,
+            p2: 13,
+            p1: 10,
+            splus: 22,
+            stier: 440,
+            atier: 2904,
+            sp: 803,
+            ch: null,
+          },
+          {
+            rank: 25,
+            name: 'ΞИRYЦ',
+            server: 'G103',
+            power: '74,808',
+            rr: 123,
+            p4: null,
+            p3: 0,
+            p2: 7,
+            p1: 19,
+            splus: 41,
+            stier: 398,
+            atier: 3205,
+            sp: 799,
+            ch: null,
+          },
+          {
+            rank: 26,
+            name: 'Ema',
+            server: 'G279',
+            power: '70,720',
+            rr: 127,
+            p4: null,
+            p3: 1,
+            p2: 15,
+            p1: 7,
+            splus: 35,
+            stier: 446,
+            atier: 2940,
+            sp: 814,
+            ch: null,
+          },
+          {
+            rank: 27,
+            name: 'arez',
+            server: 'G302',
+            power: '76,451',
+            rr: 136,
+            p4: null,
+            p3: 0,
+            p2: 5,
+            p1: 20,
+            splus: 42,
+            stier: 403,
+            atier: 3097,
+            sp: 790,
+            ch: null,
+          },
+          {
+            rank: 28,
+            name: 'frawress',
+            server: 'G310',
+            power: '73,546',
+            rr: 132,
+            p4: null,
+            p3: 0,
+            p2: 7,
+            p1: 14,
+            splus: 42,
+            stier: 388,
+            atier: 3136,
+            sp: 780,
+            ch: null,
+          },
+          {
+            rank: 29,
+            name: 'Moanblanc',
+            server: 'G325',
+            power: '71,570',
+            rr: 111,
+            p4: null,
+            p3: 0,
+            p2: 10,
+            p1: 12,
+            splus: 40,
+            stier: 385,
+            atier: 2884,
+            sp: 746,
+            ch: null,
+          },
+          {
+            rank: 30,
+            name: 'Mae',
+            server: 'G432',
+            power: '74,521',
+            rr: 127,
+            p4: null,
+            p3: 0,
+            p2: 0,
+            p1: 20,
+            splus: 51,
+            stier: 390,
+            atier: 3029,
+            sp: 769,
+            ch: null,
+          },
+          {
+            rank: 31,
+            name: 'BSHR',
+            server: 'G714',
+            power: '47,835',
+            rr: 63,
+            p4: null,
+            p3: 0,
+            p2: 0,
+            p1: 0,
+            splus: 24,
+            stier: 150,
+            atier: 1157,
+            sp: 295,
+            ch: null,
+          },
+          {
+            rank: 32,
+            name: 'Vesper',
+            server: 'G721',
+            power: '48,727',
+            rr: 95,
+            p4: null,
+            p3: 0,
+            p2: 0,
+            p1: 0,
+            splus: 26,
+            stier: 165,
+            atier: 1251,
+            sp: 321,
+            ch: null,
+          },
+          {
+            rank: 33,
+            name: 'leiolas',
+            server: 'PTR1',
+            power: '83,822',
+            rr: 141,
+            p4: null,
+            p3: 0,
+            p2: 15,
+            p1: 25,
+            splus: 40,
+            stier: 525,
+            atier: 4022,
+            sp: 1028,
+            ch: null,
+          },
+        ],
+        6: [
+          {
+            rank: 1,
+            name: 'Sarey',
+            server: 'S2',
+            power: '84,751',
+            rr: 152,
+            p4: null,
+            p3: 3,
+            p2: 12,
+            p1: 7,
+            splus: 6,
+            stier: 51,
+            atier: 600,
+            sp: 4611,
+            ch: 1176,
+          },
+          {
+            rank: 2,
+            name: 'Gauliath',
+            server: 'S3',
+            power: '88,888',
+            rr: 169,
+            p4: null,
+            p3: null,
+            p2: 9,
+            p1: 15,
+            splus: 62,
+            stier: 482,
+            atier: 3773,
+            sp: 954,
+            ch: 126,
+          },
+          {
+            rank: 3,
+            name: 'Almendra',
+            server: 'S4',
+            power: '84,199',
+            rr: 179,
+            p4: null,
+            p3: null,
+            p2: 18,
+            p1: 12,
+            splus: 46,
+            stier: 478,
+            atier: 4114,
+            sp: 992,
+            ch: 130,
+          },
+          {
+            rank: 4,
+            name: 'SolteC',
+            server: 'S12',
+            power: '86,563',
+            rr: 162,
+            p4: null,
+            p3: 11,
+            p2: 6,
+            p1: 12,
+            splus: 57,
+            stier: 534,
+            atier: 4615,
+            sp: 1111,
+            ch: 123,
+          },
+          {
+            rank: 5,
+            name: 'Fjellryn',
+            server: 'S22',
+            power: '92,703',
+            rr: 180,
+            p4: null,
+            p3: 1,
+            p2: 15,
+            p1: 15,
+            splus: 64,
+            stier: 563,
+            atier: 4572,
+            sp: 1135,
+            ch: 148,
+          },
+          {
+            rank: 6,
+            name: 'Soy',
+            server: 'S45',
+            power: '91,411',
+            rr: 185,
+            p4: null,
+            p3: 8,
+            p2: 11,
+            p1: 18,
+            splus: 51,
+            stier: 589,
+            atier: 4419,
+            sp: 1141,
+            ch: 141,
+          },
+          {
+            rank: 7,
+            name: 'Krul',
+            server: 'S50',
+            power: '88,038',
+            rr: 161,
+            p4: null,
+            p3: 12,
+            p2: 9,
+            p1: 16,
+            splus: 46,
+            stier: 592,
+            atier: 4547,
+            sp: 1160,
+            ch: 148,
+          },
+          {
+            rank: 8,
+            name: 'Ariik',
+            server: 'S52',
+            power: '89,965',
+            rr: 175,
+            p4: null,
+            p3: 1,
+            p2: 14,
+            p1: 14,
+            splus: 61,
+            stier: 542,
+            atier: 4197,
+            sp: 1067,
+            ch: 119,
+          },
+          {
+            rank: 9,
+            name: 'Kazakiri',
+            server: 'S74',
+            power: '63,116',
+            rr: 29,
+            p4: null,
+            p3: null,
+            p2: null,
+            p1: 44,
+            splus: null,
+            stier: 257,
+            atier: 2067,
+            sp: 515,
+            ch: 56,
+          },
+          {
+            rank: 10,
+            name: 'Dracias',
+            server: 'S91',
+            power: '87,105',
+            rr: 167,
+            p4: null,
+            p3: 6,
+            p2: 9,
+            p1: 14,
+            splus: 55,
+            stier: 519,
+            atier: 4197,
+            sp: 1044,
+            ch: 140,
+          },
+          {
+            rank: 11,
+            name: 'Gibe',
+            server: 'S91',
+            power: '87,050',
+            rr: 162,
+            p4: null,
+            p3: 8,
+            p2: 10,
+            p1: 5,
+            splus: 54,
+            stier: 502,
+            atier: 4110,
+            sp: 1016,
+            ch: 140,
+          },
+          {
+            rank: 12,
+            name: 'Rod',
+            server: 'S103',
+            power: '90,800',
+            rr: 172,
+            p4: null,
+            p3: 4,
+            p2: 15,
+            p1: 11,
+            splus: 61,
+            stier: 542,
+            atier: 4249,
+            sp: 1073,
+            ch: 135,
+          },
+          {
+            rank: 13,
+            name: 'Week',
+            server: 'S104',
+            power: '91,232',
+            rr: 183,
+            p4: null,
+            p3: 9,
+            p2: 10,
+            p1: 19,
+            splus: 53,
+            stier: 586,
+            atier: 4685,
+            sp: 1172,
+            ch: 141,
+          },
+          {
+            rank: 14,
+            name: 'Boo',
+            server: 'S117',
+            power: '93,005',
+            rr: 181,
+            p4: null,
+            p3: null,
+            p2: 19,
+            p1: 10,
+            splus: 65,
+            stier: 581,
+            atier: 3908,
+            sp: 1070,
+            ch: 142,
+          },
+          {
+            rank: 15,
+            name: 'VirginiaVirgin',
+            server: 'S181',
+            power: '93,415',
+            rr: 166,
+            p4: null,
+            p3: null,
+            p2: null,
+            p1: 89,
+            splus: null,
+            stier: 451,
+            atier: 4326,
+            sp: 992,
+            ch: 140,
+          },
+          {
+            rank: 16,
+            name: 'asuna',
+            server: 'S186',
+            power: '85,763',
+            rr: 157,
+            p4: null,
+            p3: null,
+            p2: 8,
+            p1: 15,
+            splus: 63,
+            stier: 474,
+            atier: 3651,
+            sp: 930,
+            ch: 124,
+          },
+          {
+            rank: 17,
+            name: 'Askgar',
+            server: 'S237',
+            power: '85,246',
+            rr: 175,
+            p4: null,
+            p3: 1,
+            p2: 18,
+            p1: 19,
+            splus: 35,
+            stier: 562,
+            atier: 4250,
+            sp: 1093,
+            ch: 131,
+          },
+          {
+            rank: 18,
+            name: 'longhaul357',
+            server: 'S261',
+            power: '90,025',
+            rr: 175,
+            p4: null,
+            p3: null,
+            p2: 9,
+            p1: 19,
+            splus: 59,
+            stier: 497,
+            atier: 3831,
+            sp: 976,
+            ch: 131,
+          },
+          {
+            rank: 19,
+            name: 'Foxy',
+            server: 'S272',
+            power: '94,780',
+            rr: 186,
+            p4: null,
+            p3: null,
+            p2: 12,
+            p1: 22,
+            splus: 55,
+            stier: 543,
+            atier: 4137,
+            sp: 1060,
+            ch: 153,
+          },
+          {
+            rank: 20,
+            name: 'Eternity',
+            server: 'S314',
+            power: '90,702',
+            rr: 185,
+            p4: 2,
+            p3: 13,
+            p2: 4,
+            p1: 12,
+            splus: 54,
+            stier: 616,
+            atier: 4464,
+            sp: 1174,
+            ch: 144,
+          },
+          {
+            rank: 21,
+            name: 'Grumpinger',
+            server: 'S409',
+            power: '71,866',
+            rr: 106,
+            p4: 1,
+            p3: 14,
+            p2: 8,
+            p1: 8,
+            splus: 22,
+            stier: 516,
+            atier: 3904,
+            sp: 1004,
+            ch: 113,
+          },
+          {
+            rank: 22,
+            name: 'Emilico',
+            server: 'S418',
+            power: '84,829',
+            rr: 150,
+            p4: null,
+            p3: 7,
+            p2: 16,
+            p1: 17,
+            splus: 35,
+            stier: 576,
+            atier: 4350,
+            sp: 1120,
+            ch: 131,
+          },
+          {
+            rank: 23,
+            name: 'F2PlayGuy',
+            server: 'S438',
+            power: '83,197',
+            rr: 172,
+            p4: null,
+            p3: null,
+            p2: 10,
+            p1: 17,
+            splus: 48,
+            stier: 465,
+            atier: 3560,
+            sp: 910,
+            ch: 127,
+          },
+          {
+            rank: 24,
+            name: 'wulala',
+            server: 'S443',
+            power: '82,080',
+            rr: 132,
+            p4: null,
+            p3: 14,
+            p2: 10,
+            p1: 8,
+            splus: 40,
+            stier: 612,
+            atier: 4166,
+            sp: 1133,
+            ch: 131,
+          },
+          {
+            rank: 25,
+            name: 'elfe',
+            server: 'S467',
+            power: '78,585',
+            rr: 117,
+            p4: 8,
+            p3: 8,
+            p2: 10,
+            p1: 10,
+            splus: 29,
+            stier: 586,
+            atier: 4560,
+            sp: 1156,
+            ch: 146,
+          },
+          {
+            rank: 26,
+            name: 'Plinko-Mori',
+            server: 'S481',
+            power: '82,577',
+            rr: 109,
+            p4: null,
+            p3: null,
+            p2: 9,
+            p1: 20,
+            splus: 30,
+            stier: 438,
+            atier: 2737,
+            sp: 780,
+            ch: 122,
+          },
+          {
+            rank: 27,
+            name: 'BlackChameleon',
+            server: 'S498',
+            power: '92,227',
+            rr: 167,
+            p4: null,
+            p3: null,
+            p2: 15,
+            p1: 14,
+            splus: 64,
+            stier: 530,
+            atier: 4314,
+            sp: 1069,
+            ch: 134,
+          },
+          {
+            rank: 28,
+            name: 'RanDL',
+            server: 'S511',
+            power: '74,077',
+            rr: 96,
+            p4: 2,
+            p3: 14,
+            p2: 5,
+            p1: 9,
+            splus: 32,
+            stier: 591,
+            atier: 3991,
+            sp: 1090,
+            ch: 126,
+          },
+          {
+            rank: 29,
+            name: 'Zat',
+            server: 'S516',
+            power: '89,007',
+            rr: 178,
+            p4: null,
+            p3: 11,
+            p2: 9,
+            p1: 8,
+            splus: 54,
+            stier: 570,
+            atier: 4233,
+            sp: 1099,
+            ch: 137,
+          },
+          {
+            rank: 30,
+            name: 'Culpeo',
+            server: 'S518',
+            power: '90,212',
+            rr: 178,
+            p4: null,
+            p3: 4,
+            p2: 17,
+            p1: 13,
+            splus: 57,
+            stier: 548,
+            atier: 4654,
+            sp: 1130,
+            ch: 139,
+          },
+          {
+            rank: 31,
+            name: 'Rae',
+            server: 'S537',
+            power: '86,116',
+            rr: 173,
+            p4: null,
+            p3: 2,
+            p2: 14,
+            p1: 14,
+            splus: 48,
+            stier: 495,
+            atier: 4131,
+            sp: 1011,
+            ch: 135,
+          },
+          {
+            rank: 32,
+            name: 'Mavis',
+            server: 'S602',
+            power: '88,473',
+            rr: 177,
+            p4: null,
+            p3: 1,
+            p2: 16,
+            p1: 17,
+            splus: 53,
+            stier: 533,
+            atier: 4108,
+            sp: 1047,
+            ch: 127,
+          },
+          {
+            rank: 33,
+            name: 'ashu',
+            server: 'S607',
+            power: '85,795',
+            rr: 171,
+            p4: null,
+            p3: null,
+            p2: 16,
+            p1: 12,
+            splus: 50,
+            stier: 513,
+            atier: 3608,
+            sp: 964,
+            ch: 109,
+          },
+          {
+            rank: 34,
+            name: 'Cynthia',
+            server: 'G1',
+            power: '69,422',
+            rr: 115,
+            p4: null,
+            p3: 14,
+            p2: 9,
+            p1: 7,
+            splus: 21,
+            stier: 542,
+            atier: 3560,
+            sp: 987,
+            ch: 107,
+          },
+          {
+            rank: 35,
+            name: 'K4E',
+            server: 'G58',
+            power: '84,140',
+            rr: 182,
+            p4: null,
+            p3: 1,
+            p2: 17,
+            p1: 13,
+            splus: 43,
+            stier: 510,
+            atier: 3861,
+            sp: 993,
+            ch: 138,
+          },
+          {
+            rank: 36,
+            name: 'ΞИRYЦ',
+            server: 'G103',
+            power: '83,930',
+            rr: 160,
+            p4: null,
+            p3: 4,
+            p2: 16,
+            p1: 8,
+            splus: 46,
+            stier: 476,
+            atier: 4064,
+            sp: 984,
+            ch: 122,
+          },
+          {
+            rank: 37,
+            name: 'Ema',
+            server: 'G279',
+            power: '80,380',
+            rr: 176,
+            p4: null,
+            p3: 14,
+            p2: 4,
+            p1: 5,
+            splus: 44,
+            stier: 542,
+            atier: 3747,
+            sp: 1010,
+            ch: 125,
+          },
+          {
+            rank: 38,
+            name: 'arez',
+            server: 'G302',
+            power: '88,345',
+            rr: 185,
+            p4: null,
+            p3: 1,
+            p2: 18,
+            p1: 12,
+            splus: 51,
+            stier: 508,
+            atier: 3978,
+            sp: 1005,
+            ch: 128,
+          },
+          {
+            rank: 39,
+            name: 'frawress',
+            server: 'G310',
+            power: '85,326',
+            rr: 181,
+            p4: null,
+            p3: 3,
+            p2: 16,
+            p1: 8,
+            splus: 52,
+            stier: 496,
+            atier: 4074,
+            sp: 1005,
+            ch: 119,
+          },
+          {
+            rank: 40,
+            name: 'moancessca',
+            server: 'G325',
+            power: '81,973',
+            rr: 154,
+            p4: null,
+            p3: null,
+            p2: 21,
+            p1: 10,
+            splus: 41,
+            stier: 487,
+            atier: 3625,
+            sp: 940,
+            ch: 108,
+          },
+          {
+            rank: 41,
+            name: 'Vin',
+            server: 'G461',
+            power: '83,003',
+            rr: 172,
+            p4: null,
+            p3: null,
+            p2: 7,
+            p1: 20,
+            splus: 52,
+            stier: 471,
+            atier: 3504,
+            sp: 909,
+            ch: 100,
+          },
+          {
+            rank: 42,
+            name: 'Anka',
+            server: 'G527',
+            power: '86,595',
+            rr: 155,
+            p4: null,
+            p3: null,
+            p2: 4,
+            p1: 19,
+            splus: 56,
+            stier: 447,
+            atier: 3555,
+            sp: 891,
+            ch: 96,
+          },
+          {
+            rank: 43,
+            name: 'AIZEN',
+            server: 'G636',
+            power: '70,633',
+            rr: 164,
+            p4: null,
+            p3: null,
+            p2: 10,
+            p1: 14,
+            splus: 33,
+            stier: 379,
+            atier: 2933,
+            sp: 746,
+            ch: 88,
+          },
+          {
+            rank: 44,
+            name: 'Aurelion',
+            server: 'G690',
+            power: '62,666',
+            rr: 151,
+            p4: null,
+            p3: null,
+            p2: 2,
+            p1: 19,
+            splus: 22,
+            stier: 307,
+            atier: 2220,
+            sp: 585,
+            ch: 66,
+          },
+          {
+            rank: 45,
+            name: 'Vesper',
+            server: 'G721',
+            power: '66,445',
+            rr: 146,
+            p4: null,
+            p3: null,
+            p2: 3,
+            p1: 44,
+            splus: null,
+            stier: 264,
+            atier: 2051,
+            sp: 520,
+            ch: 62,
+          },
+          {
+            rank: 46,
+            name: 'gogogo',
+            server: 'G749',
+            power: '63,041',
+            rr: 140,
+            p4: null,
+            p3: null,
+            p2: 3,
+            p1: 40,
+            splus: null,
+            stier: 240,
+            atier: 1787,
+            sp: 463,
+            ch: 55,
+          },
+          {
+            rank: 47,
+            name: 'Lirien',
+            server: 'H8',
+            power: '47,772',
+            rr: 115,
+            p4: null,
+            p3: null,
+            p2: null,
+            p1: 15,
+            splus: 127,
+            stier: null,
+            atier: 920,
+            sp: 242,
+            ch: 37,
+          },
+          {
+            rank: 48,
+            name: 'Autumn',
+            server: 'H40',
+            power: '32,355',
+            rr: null,
+            p4: null,
+            p3: null,
+            p2: null,
+            p1: 6,
+            splus: 74,
+            stier: null,
+            atier: 599,
+            sp: 149,
+            ch: 5,
+          },
+          {
+            rank: 49,
+            name: 'Leiolas',
+            server: 'PTR1',
+            power: '94,144',
+            rr: 190,
+            p4: null,
+            p3: 4,
+            p2: 16,
+            p1: 23,
+            splus: 48,
+            stier: 618,
+            atier: 4623,
+            sp: 1196,
+            ch: 168,
+          },
+        ],
+      };
+
+      let state = { season: '6', search: '', sortKey: 'server', sortAsc: true };
+
+      const parseNum = (str) => {
+        if (typeof str === 'number') return str;
+        return parseFloat(String(str).replace(/,/g, '')) || 0;
+      };
+
+      const parseServer = (srv) => {
+        if (!srv || srv === '—') return { type: 99, num: 999999 };
+        const match = srv.match(/^([A-Za-z]+)(\d+)$/);
+        if (!match) return { type: 98, num: 999999 };
+        const typeMap = { S: 1, G: 2, H: 3, PTR: 4 };
+        return {
+          type: typeMap[match[1]] || 5,
+          num: parseInt(match[2], 10),
+        };
+      };
+
+      const fmtVal = (val) => (val === null || val === undefined ? '—' : val);
+
+      function getServerBadge(srv) {
+        if (!srv || srv === '—') return '<span class="muted">—</span>';
+        if (srv.startsWith('G'))
+          return `<span class="server-badge srv-g">${srv}</span>`;
+        if (srv.startsWith('H'))
+          return `<span class="server-badge srv-h">${srv}</span>`;
+        if (srv.startsWith('PTR'))
+          return `<span class="server-badge srv-ptr">${srv}</span>`;
+        return `<span class="server-badge srv-s">${srv}</span>`;
+      }
+
+      function updateSortHeaders() {
+        document.querySelectorAll('th[data-key]').forEach((th) => {
+          const key = th.getAttribute('data-key');
+          const label = th.getAttribute('data-label');
+          if (state.sortKey === key) {
+            th.classList.add('active-sort');
+            th.innerText = `${label} ${state.sortAsc ? '▲' : '▼'}`;
+          } else {
+            th.classList.remove('active-sort');
+            th.innerText = `${label} ↕`;
+          }
+        });
+      }
+
+      function getEmptyMessage(season) {
+        if (season === '1') {
+          return `Continuous community stats tracking began in Season 2.`;
+        }
+        if (season === '7') {
+          return `<strong>Season 7</strong> is coming up! Data collection and tracking will begin in a few days.`;
+        }
+        return `No data recorded for Season ${season} yet.`;
+      }
+
+      function render() {
+        document.getElementById('seasonList').innerHTML = [1, 2, 3, 4, 5, 6, 7]
+          .map(
+            (s) => `
+            <div class="season ${s == state.season ? 'active' : ''} ${!SEASONS_DATA[s] ? 'blank' : ''}"
+                 onclick="selectSeason('${s}')"
+                 tabindex="0"
+                 onkeydown="if(event.key==='Enter') selectSeason('${s}')">
+              S${s}
+            </div>
+          `,
+          )
+          .join('');
+
+        document.getElementById('mainTitle').innerText =
+          `Season ${state.season} Community Stats`;
+        updateSortHeaders();
+
+        const currentData = SEASONS_DATA[state.season] || [];
+
+        if (!currentData.length) {
+          document.getElementById('tableTitle').innerText =
+            `Season ${state.season} Data`;
+          document.getElementById('tbody').innerHTML = `
+            <tr>
+              <td colspan="14" style="text-align:center; padding: 40px 20px; color: var(--muted); font-size: 15px;">
+                ${getEmptyMessage(state.season)}
+              </td>
+            </tr>`;
+          document.getElementById('players').innerText = '—';
+          document.getElementById('avgPower').innerText = '—';
+          document.getElementById('count').innerText = '0 players';
+          return;
+        }
+
+        let list = currentData.filter((item) => {
+          const q = state.search.toLowerCase();
+          return (
+            item.name.toLowerCase().includes(q) ||
+            item.server.toLowerCase().includes(q)
+          );
+        });
+
+        list.sort((a, b) => {
+          if (state.sortKey === 'server') {
+            const sa = parseServer(a.server);
+            const sb = parseServer(b.server);
+            if (sa.type !== sb.type)
+              return state.sortAsc ? sa.type - sb.type : sb.type - sa.type;
+            if (sa.num !== sb.num)
+              return state.sortAsc ? sa.num - sb.num : sb.num - sb.num;
+            return 0;
+          }
+
+          let va = a[state.sortKey],
+            vb = b[state.sortKey];
+          if (
+            [
+              'power',
+              'sp',
+              'ch',
+              'stier',
+              'atier',
+              'rr',
+              'splus',
+              'p1',
+              'p2',
+              'p3',
+              'p4',
+              'rank',
+            ].includes(state.sortKey)
+          ) {
+            va = parseNum(va);
+            vb = parseNum(vb);
+          }
+          if (va === null || va === undefined) va = -Infinity;
+          if (vb === null || vb === undefined) vb = -Infinity;
+          if (va < vb) return state.sortAsc ? -1 : 1;
+          if (va > vb) return state.sortAsc ? 1 : -1;
+          return 0;
+        });
+
+        const totalPower = list.reduce((acc, d) => acc + parseNum(d.power), 0);
+        const avgPower = list.length
+          ? Math.round(totalPower / list.length).toLocaleString()
+          : '—';
+
+        document.getElementById('tableTitle').innerText =
+          `Season ${state.season} Community Data`;
+        document.getElementById('players').innerText = list.length;
+        document.getElementById('avgPower').innerText = avgPower;
+        document.getElementById('count').innerText =
+          `Showing ${list.length} of ${currentData.length} players`;
+
+        const tbody = document.getElementById('tbody');
+        tbody.innerHTML = list
+          .map(
+            (d, index) => `
+          <tr>
+            <td class="rank" style="color:var(--muted);">${index + 1}</td>
+            <td class="player" style="font-weight:600;">${d.name}</td>
+            <td>${getServerBadge(d.server)}</td>
+            <td class="num power-val">${d.power}</td>
+            <td class="num">${fmtVal(d.rr)}</td>
+            <td class="num">${d.p4 ? `<span class="p-tier p4-val">${d.p4}</span>` : '—'}</td>
+            <td class="num">${d.p3 ? `<span class="p-tier p3-val">${d.p3}</span>` : '—'}</td>
+            <td class="num">${d.p2 ? `<span class="p-tier p2-val">${d.p2}</span>` : '—'}</td>
+            <td class="num">${d.p1 ? `<span class="p-tier p1-val">${d.p1}</span>` : '—'}</td>
+            <td class="num">${fmtVal(d.splus)}</td>
+            <td class="num">${fmtVal(d.stier)}</td>
+            <td class="num">${fmtVal(d.atier)}</td>
+            <td class="num" style="font-weight:700;color:var(--afk-gold);">${fmtVal(d.sp)}</td>
+            <td class="num">${fmtVal(d.ch)}</td>
+          </tr>
+        `,
+          )
+          .join('');
+      }
+
+      function selectSeason(s) {
+        state.season = s;
+        document.getElementById('season').value = s;
+        render();
+      }
+
+      document.getElementById('exportBtn').addEventListener('click', () => {
+        const activeData = SEASONS_DATA[state.season] || [];
+        if (!activeData.length) {
+          alert('No data available to export for this season.');
+          return;
+        }
+        const headers = [
+          'ID',
+          'Name',
+          'Server',
+          'Power',
+          'RR',
+          'P4',
+          'P3',
+          'P2',
+          'P1',
+          'S+',
+          'S-Tier',
+          'A-Tier',
+          'SP',
+          'CH',
+        ];
+        const rows = activeData.map((d, idx) =>
+          [
+            idx + 1,
+            d.name,
+            d.server,
+            d.power,
+            d.rr,
+            d.p4,
+            d.p3,
+            d.p2,
+            d.p1,
+            d.splus,
+            d.stier,
+            d.atier,
+            d.sp,
+            d.ch,
+          ]
+            .map((v) => (v === null || v === undefined ? '' : v))
+            .join(','),
+        );
+        const csvContent = [headers.join(','), ...rows].join('\n');
+
+        navigator.clipboard.writeText(csvContent).then(() => {
+          const btn = document.getElementById('exportBtn');
+          btn.innerText = '✅ Copied to Clipboard!';
+          setTimeout(() => (btn.innerText = '📥 Copy CSV Data'), 2000);
+        });
+      });
+
+      document.getElementById('season').addEventListener('change', (e) => {
+        state.season = e.target.value;
+        render();
+      });
+
+      document.getElementById('search').addEventListener('input', (e) => {
+        state.search = e.target.value;
+        render();
+      });
+
+      document.getElementById('reset').addEventListener('click', () => {
+        state = { season: '6', search: '', sortKey: 'server', sortAsc: true };
+        document.getElementById('season').value = '6';
+        document.getElementById('search').value = '';
+        render();
+      });
+
+      document.querySelectorAll('th[data-key]').forEach((th) => {
+        th.addEventListener('click', () => {
+          const key = th.getAttribute('data-key');
+          if (state.sortKey === key) state.sortAsc = !state.sortAsc;
+          else {
+            state.sortKey = key;
+            state.sortAsc = true;
+          }
+          render();
+        });
+      });
+
+      render();
+    </script>
+  </body>
+</html>
