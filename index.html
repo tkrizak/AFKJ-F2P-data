@@ -8,7 +8,11 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <!-- Vercel Web Analytics -->
     <script>
-      window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };
+      window.va =
+        window.va ||
+        function () {
+          (window.vaq = window.vaq || []).push(arguments);
+        };
     </script>
     <script defer src="/_vercel/insights/script.js"></script>
     <style>
@@ -96,9 +100,20 @@
 
       .header-brand {
         display: flex;
-        gap: 14px;
+        gap: 0;
         align-items: center;
         flex-shrink: 0;
+        cursor: pointer;
+      }
+
+      .header-brand:hover {
+        /* Keep the header artwork completely stationary on hover. */
+      }
+
+      .header-brand:focus-visible {
+        outline: 2px solid var(--afk-cyan);
+        outline-offset: 4px;
+        border-radius: 10px;
       }
 
       .game-logo-frame {
@@ -106,8 +121,8 @@
         height: 80px;
         border-radius: 12px;
         overflow: hidden;
-        border: 2px solid var(--afk-gold);
-        box-shadow: 0 0 14px var(--afk-gold-glow);
+        border: 1px solid rgba(248, 194, 68, 0.25);
+        box-shadow: 0 3px 10px rgba(0, 0, 0, 0.4);
         flex-shrink: 0;
         background: #000;
         display: flex;
@@ -124,14 +139,14 @@
         display: flex;
         align-items: center;
         justify-content: center;
-        padding: 4px;
+        padding: 0;
         background: rgba(10, 16, 32, 0.6);
         border-radius: 10px;
         border: 1px solid rgba(248, 194, 68, 0.25);
         box-shadow: 0 3px 10px rgba(0, 0, 0, 0.4);
       }
       .f2p-badge-wrapper img {
-        height: 74px;
+        height: 78px;
         width: auto;
         display: block;
         object-fit: contain;
@@ -889,7 +904,7 @@
       .modal-ratio-line .ratio-description {
         display: block;
         margin-top: 3px;
-        font-size: 10px;
+        font-size: 12px;
         white-space: normal;
       }
       .modal-close {
@@ -1158,7 +1173,14 @@
     <div class="container">
       <header>
         <div class="header-left">
-          <div class="header-brand">
+          <div
+            class="header-brand"
+            id="headerBrand"
+            role="button"
+            tabindex="0"
+            title="Refresh dashboard"
+            aria-label="Refresh dashboard"
+          >
             <div class="game-logo-frame">
               <img
                 src="afk-journey-logo.png"
@@ -4330,11 +4352,11 @@
         } else if (currentSeasonFound && currentCh === null) {
           // The player exists in this season, but CH was not collected for
           // that season. Do not display a misleading 0 or career total.
-          chBadgeHtml = `<span class="ratio-title"><span class="ch-val">CH</span> Copies</span><span class="ratio-description" style="margin-top: 5px; color: var(--muted);">Was not tracked in Season ${currentSeasonNum}</span>`;
+          chBadgeHtml = `<span class="ratio-title">Career <span class="ch-val">CH</span> Copies</span><span class="ratio-description" style="margin-top: 5px; color: var(--muted);">Not tracked in season ${currentSeasonNum}</span>`;
         } else if (!currentSeasonFound && hasChData) {
           // Future/upcoming season: keep the career total, but don't pretend
           // there is a season comparison when the selected season has no data.
-          chBadgeHtml = `<span class="ratio-title">Career <span class="ch-val">CH</span> Copies</span><span class="ratio-value ch-val">${lifetimeCh.toLocaleString()}</span><span class="ratio-description" style="margin-top: 5px; color: var(--muted);">Season ${currentSeasonNum} has not been tracked yet</span>`;
+          chBadgeHtml = `<span class="ratio-title">Career <span class="ch-val">CH</span> Copies</span><span class="ratio-value ch-val">${lifetimeCh.toLocaleString()}</span><span class="ratio-description" style="margin-top: 5px; color: var(--muted);">Not tracked in season ${currentSeasonNum}</span>`;
         }
         document.getElementById('modalChBadge').innerHTML = chBadgeHtml;
 
@@ -4716,6 +4738,18 @@
           document.body.removeChild(textarea);
         }
       };
+
+      // Clicking the dashboard header/logo refreshes the page, similar to
+      // the home/header behavior on sites such as YouTube and Reddit.
+      const headerBrand = document.getElementById('headerBrand');
+      const refreshDashboard = () => window.location.reload();
+      headerBrand.addEventListener('click', refreshDashboard);
+      headerBrand.addEventListener('keydown', (event) => {
+        if (event.key === 'Enter' || event.key === ' ') {
+          event.preventDefault();
+          refreshDashboard();
+        }
+      });
 
       // Initial render
       renderTable();
