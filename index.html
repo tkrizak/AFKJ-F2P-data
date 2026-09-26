@@ -107,7 +107,7 @@
       }
 
       .header-brand:hover {
-        /* Keep the header artwork completely stationary on hover. */
+        transform: none; /* or any real hover effect */
       }
 
       .header-brand:focus-visible {
@@ -861,6 +861,7 @@
         flex: 0 0 auto;
         display: flex;
         gap: 10px;
+        text-align: center;
       }
       .modal-ratio-line {
         flex: 0 0 auto;
@@ -868,7 +869,6 @@
         font-size: 11px;
         line-height: 1.35;
         color: var(--muted);
-        text-align: center;
         padding: 8px 12px;
         border-radius: 8px;
         background: linear-gradient(
