@@ -930,12 +930,16 @@
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
         gap: 12px;
+        text-align: center;
       }
       .modal-stat-box {
         background: var(--panel2);
         border: 1px solid var(--panel-border);
         border-radius: 10px;
         padding: 10px 14px;
+      }
+      .modal-stat-box .stat-box-title {
+        font-size: 13px;
       }
       .modal-stat-box span {
         font-size: 12px;
@@ -945,7 +949,7 @@
         display: block;
       }
       .modal-stat-box strong {
-        font-size: 16px;
+        font-size: 15px;
         color: #fff;
         margin-top: 3px;
         display: block;
@@ -4312,19 +4316,19 @@
 
         document.getElementById('modalMetrics').innerHTML = `
           <div class="modal-stat-box stat-bp">
-            <span>👊 Season ${currentSeasonNum} Base Power</span>
+            <span class="stat-box-title">👊 Season ${currentSeasonNum} Base Power</span>
             <strong>${bpAbsText}</strong>
           </div>
           <div class="modal-stat-box stat-sp">
-            <span>⚡ Season ${currentSeasonNum} Soul Power</span>
+            <span class="stat-box-title">⚡ Season ${currentSeasonNum} Soul Power</span>
             <strong>${spAbsText}</strong>
           </div>
           <div class="modal-stat-box stat-bp">
-            <span>👊 Season ${currentSeasonNum} BP Gained</span>
+            <span class="stat-box-title">👊 Season ${currentSeasonNum} BP Gained</span>
             <strong>${bpGainText}</strong>
           </div>
           <div class="modal-stat-box stat-sp">
-            <span>⚡ Season ${currentSeasonNum} SP Gained</span>
+            <span class="stat-box-title">⚡ Season ${currentSeasonNum} SP Gained</span>
             <strong>${spGainText}</strong>
           </div>
         `;
